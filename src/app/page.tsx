@@ -1,8 +1,21 @@
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import HeroSection from "@/components/hero/HeroSection";
+import ConverterPanel from "@/components/converter/ConverterPanel";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-slate-50">
-      <h1 className="text-4xl font-bold text-slate-900 mb-2">FormatWeaver</h1>
-      <p className="text-slate-500">Universal Document Converter Boilerplate</p>
-    </main>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.08),_transparent_35%),linear-gradient(180deg,#020617_0%,#0f172a_100%)] text-white">
+      <Header />
+      <HeroSection />
+
+      <main className="mx-auto max-w-6xl px-6 py-8">
+        <div className="rounded-3xl bg-slate-900/50 p-6">
+          <ConverterPanel />
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }
