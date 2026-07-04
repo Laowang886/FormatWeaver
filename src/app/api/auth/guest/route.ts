@@ -7,7 +7,7 @@ import {
 
 export async function POST() {
   const response = NextResponse.json({
-    message: "以游客身份进入成功。",
+    message: "Guest session created.",
     user: getGuestUser(),
   });
 
