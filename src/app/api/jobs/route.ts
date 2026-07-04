@@ -1,61 +1,72 @@
-import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { NextResponse } from "next/server";
+import {
+  DEFAULT_CONVERSION_OPTIONS,
+  type ConversionOptionsState,
+  type ConversionType,
+} from "@/components/converter/conversion-types";
+import { getJobsQueue } from "@/lib/job-queue";
+import { saveUploadFiles } from "@/lib/job-storage";
+import type { JobPayload } from "@/lib/job-types";
 
-type JobStatus = "queued" | "processing" | "completed" | "failed";
-
-type JobRecord = {
-  id: string;
-  status: JobStatus;
-  progress: number;
-  type: string;
-  filename: string;
-  downloadUrl?: string;
-};
-
-declare global {
-  var __FORMATWEAVER_JOBS__: Record<string, JobRecord> | undefined;
-}
-
-// In-memory jobs store for demo purposes
-const JOBS: Record<string, JobRecord> = globalThis.__FORMATWEAVER_JOBS__ ?? {};
-globalThis.__FORMATWEAVER_JOBS__ = JOBS;
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   const form = await request.formData();
-  const type = form.get("type") as string | null;
-  const file = form.get("file");
+  const type = form.get("type") as ConversionType | null;
+  const optionsRaw = form.get("options");
+  const files = form.getAll("files");
+  const singleFile = form.get("file");
 
-  if (!type || !(file instanceof File)) {
+  const inputFiles = files.filter((item): item is File => item instanceof File);
+  if (inputFiles.length === 0 && singleFile instanceof File) {
+    inputFiles.push(singleFile);
+  }
+
+  if (!type || inputFiles.length === 0) {
     return NextResponse.json(
       { message: "type and file required" },
       { status: 400 },
     );
   }
 
+  const parsedOptions = parseOptions(optionsRaw);
   const id = randomUUID();
-  JOBS[id] = { id, status: "queued", progress: 0, type, filename: file.name };
+  const savedFiles = await saveUploadFiles(id, inputFiles);
+  const payload: JobPayload = {
+    type,
+    options: parsedOptions,
+    files: savedFiles,
+    createdAt: new Date().toISOString(),
+  };
 
-  // keep global reference for other route modules
-  globalThis.__FORMATWEAVER_JOBS__ = JOBS;
-
-  // simulate async processing
-  setTimeout(() => startProcessing(id), 500);
+  const queue = getJobsQueue();
+  await queue.add("convert", payload, {
+    jobId: id,
+    removeOnComplete: false,
+    removeOnFail: false,
+  });
 
   return NextResponse.json({ jobId: id });
 }
 
-function startProcessing(id: string) {
-  const job = JOBS[id];
-  if (!job) return;
-  job.status = "processing";
-  let p = 0;
-  const t = setInterval(() => {
-    p += 15 + Math.floor(Math.random() * 10);
-    job.progress = Math.min(100, p);
-    if (job.progress >= 100) {
-      job.status = "completed";
-      job.downloadUrl = `/api/jobs/${id}/download`;
-      clearInterval(t);
-    }
-  }, 700);
+function parseOptions(optionsRaw: FormDataEntryValue | null) {
+  if (typeof optionsRaw !== "string" || !optionsRaw.trim()) {
+    return DEFAULT_CONVERSION_OPTIONS;
+  }
+
+  try {
+    const parsed = JSON.parse(optionsRaw) as Partial<ConversionOptionsState>;
+    return {
+      pageRange: parsed.pageRange ?? DEFAULT_CONVERSION_OPTIONS.pageRange,
+      compressionQuality:
+        parsed.compressionQuality ??
+        DEFAULT_CONVERSION_OPTIONS.compressionQuality,
+      targetFormat:
+        parsed.targetFormat ?? DEFAULT_CONVERSION_OPTIONS.targetFormat,
+      mergeOrder: parsed.mergeOrder ?? DEFAULT_CONVERSION_OPTIONS.mergeOrder,
+    };
+  } catch {
+    return DEFAULT_CONVERSION_OPTIONS;
+  }
 }

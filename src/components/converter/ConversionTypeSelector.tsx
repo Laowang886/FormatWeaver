@@ -1,34 +1,44 @@
 "use client";
 
+import {
+  CONVERSION_TYPES,
+  ConversionType,
+} from "@/components/converter/conversion-types";
+
 type Props = {
-  value: string;
-  onChange: (v: string) => void;
+  value: ConversionType;
+  onChange: (v: ConversionType) => void;
 };
 
 export default function ConversionTypeSelector({ value, onChange }: Props) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      <button
-        type="button"
-        onClick={() => onChange("pdf-to-docx")}
-        className={`rounded-xl p-4 text-left ring-1 ${value === "pdf-to-docx" ? "ring-sky-500 bg-sky-500/10" : "ring-white/5 bg-slate-900/60"}`}
-      >
-        <div className="font-medium text-white">PDF → DOCX</div>
-        <div className="text-sm text-slate-400">
-          Convert PDF files to editable DOCX
-        </div>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => onChange("docx-to-pdf")}
-        className={`rounded-xl p-4 text-left ring-1 ${value === "docx-to-pdf" ? "ring-sky-500 bg-sky-500/10" : "ring-white/5 bg-slate-900/60"}`}
-      >
-        <div className="font-medium text-white">DOCX → PDF</div>
-        <div className="text-sm text-slate-400">
-          Convert Word documents to PDF
-        </div>
-      </button>
+    <div className="grid gap-2">
+      {CONVERSION_TYPES.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          onClick={() => onChange(item.id)}
+          className={`group border p-4 text-left transition ${
+            value === item.id
+              ? "border-cyan-300 bg-cyan-300/10"
+              : "border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.06]"
+          }`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="font-medium text-white">{item.title}</div>
+              <div className="mt-1 text-sm leading-5 text-slate-400">
+                {item.description}
+              </div>
+            </div>
+            <span
+              className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
+                value === item.id ? "bg-cyan-300" : "bg-slate-700"
+              }`}
+            />
+          </div>
+        </button>
+      ))}
     </div>
   );
 }

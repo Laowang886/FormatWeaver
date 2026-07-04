@@ -1,37 +1,30 @@
-"use client";
-
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { cookies } from "next/headers";
+import { SESSION_COOKIE_NAME, getUserFromSessionToken } from "@/lib/auth";
 
-export default function Header() {
-  const [userName, setUserName] = useState<string | null>(null);
-
-  useEffect(() => {
-    // lightweight check for demo: read a cookie via /api/auth/me
-    (async () => {
-      try {
-        const res = await fetch("/api/auth/me");
-        if (res.ok) {
-          const { user } = await res.json();
-          if (user?.name) setUserName(user.name);
-        }
-      } catch {}
-    })();
-  }, []);
+export default async function Header() {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const user = getUserFromSessionToken(sessionToken);
 
   return (
-    <header className="w-full border-b border-slate-800 bg-transparent">
+    <header className="w-full border-b border-white/10 bg-[#080b12]/95">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-        <Link href="/" className="text-xl font-semibold text-white">
-          FormatWeaver
+        <Link href="/" className="flex items-center gap-3 text-white">
+          <span className="grid h-9 w-9 place-items-center bg-cyan-400 text-sm font-bold text-slate-950">
+            FW
+          </span>
+          <span className="text-lg font-semibold">FormatWeaver</span>
         </Link>
 
         <div className="flex items-center gap-3">
-          {userName ? (
+          {user ? (
             <div className="flex items-center gap-3">
-              <div className="text-sm text-slate-200">{userName}</div>
+              <div className="hidden text-sm text-slate-300 sm:block">
+                {user.name}
+              </div>
               <form action="/api/auth/logout" method="post">
-                <button className="rounded-md bg-rose-500 px-3 py-2 text-sm font-medium text-white hover:bg-rose-400">
+                <button className="border border-rose-400/40 px-3 py-2 text-sm font-medium text-rose-100 hover:bg-rose-500/10">
                   Logout
                 </button>
               </form>
@@ -39,7 +32,7 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="rounded-md bg-sky-500 px-3 py-2 text-sm font-medium text-white hover:bg-sky-400"
+              className="bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300"
             >
               Login
             </Link>
