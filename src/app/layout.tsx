@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FormatWeaver | 文件转换与登录演示",
-  description: "FormatWeaver 的前后端演示，包含登录页、登录接口和受保护页面。",
+  title: "FormatWeaver | File Conversion and Authentication Demo",
+  description:
+    "A FormatWeaver frontend and backend demo with login, authentication APIs, and protected pages.",
 };
 
 export default function RootLayout({

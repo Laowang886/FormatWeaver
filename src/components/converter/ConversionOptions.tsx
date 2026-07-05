@@ -30,7 +30,7 @@ export default function ConversionOptions({ fields, values, onChange }: Props) {
   }
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+    <div className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/40 p-5">
       <div className="text-sm font-medium text-white">Conversion options</div>
 
       <div className="space-y-4">
@@ -49,7 +49,7 @@ export default function ConversionOptions({ fields, values, onChange }: Props) {
                     )
                   }
                   placeholder={field.placeholder}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15"
                 />
                 <p className="text-xs leading-5 text-slate-400">
                   {field.helperText}
@@ -65,7 +65,7 @@ export default function ConversionOptions({ fields, values, onChange }: Props) {
                   <div className="text-sm font-medium text-slate-100">
                     {field.label}
                   </div>
-                  <div className="text-sm text-sky-300">
+                  <div className="text-sm text-cyan-300">
                     {values.compressionQuality}%
                   </div>
                 </div>
@@ -127,7 +127,7 @@ export default function ConversionOptions({ fields, values, onChange }: Props) {
                       ),
                     );
                   }}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15"
                 >
                   {field.options.map((option) => (
                     <option key={option.value} value={option.value}>

@@ -5,12 +5,12 @@ import ConverterPanel from "@/components/converter/ConverterPanel";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#080b12] text-white">
+    <div className="flex min-h-screen flex-col bg-[#060913] text-white">
       <Header />
 
-      <main>
+      <main className="flex-1">
         <HeroSection />
-        <section className="border-y border-white/10 bg-[#10141f]">
+        <section className="pb-20 sm:pb-24">
           <ConverterPanel />
         </section>
       </main>

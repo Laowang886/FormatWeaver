@@ -8,7 +8,6 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  FileCode2,
   Loader2,
   Lock,
   Mail,
@@ -54,10 +53,10 @@ function getStoredLoginPreferences() {
   }
 }
 
-export default function LoginForm({ initialMode = "guest" }: LoginFormProps) {
+export default function LoginForm({ initialMode = "account" }: LoginFormProps) {
   const router = useRouter();
   const storedPreferences = getStoredLoginPreferences();
-  const [mode, setMode] = useState<LoginMode>(initialMode);
+  const [mode] = useState<LoginMode>(initialMode);
   const [email, setEmail] = useState(storedPreferences.email);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -154,51 +153,22 @@ export default function LoginForm({ initialMode = "guest" }: LoginFormProps) {
   return (
     <div className="flex flex-col gap-5">
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 rotate-3">
-          <FileCode2 className="h-5.5 w-5.5 -rotate-3 text-slate-950" />
+        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-400 text-sm font-bold tracking-tight text-slate-950">
+          FW
         </div>
-        <h2 className="text-2xl font-bold text-white">Secure Member Login</h2>
-        <p className="mt-1.5 text-xs text-slate-400">
+        <h2 className="text-2xl font-semibold tracking-tight text-white">
+          Secure Member Login
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-400">
           Access your secure file sandbox & concurrent job pipelines.
         </p>
-      </div>
-
-      <div className="grid grid-cols-2 rounded-2xl bg-slate-950 p-1 ring-1 ring-slate-800">
-        <button
-          type="button"
-          onClick={() => {
-            setMode("guest");
-            setError(null);
-          }}
-          className={`rounded-xl px-4 py-3 text-sm font-medium transition ${
-            mode === "guest"
-              ? "bg-emerald-500 text-slate-950"
-              : "text-slate-400 hover:text-slate-200"
-          }`}
-        >
-          Guest Mode
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setMode("account");
-            setError(null);
-          }}
-          className={`rounded-xl px-4 py-3 text-sm font-medium transition ${
-            mode === "account"
-              ? "bg-emerald-500 text-slate-950"
-              : "text-slate-400 hover:text-slate-200"
-          }`}
-        >
-          Account Mode
-        </button>
       </div>
 
       <button
         type="button"
         disabled={loading}
         onClick={handleGoogleLogin}
-        className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700 hover:bg-slate-950/80 hover:text-white disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-700 bg-slate-950/40 px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-600 hover:bg-slate-900 hover:text-white disabled:opacity-50"
       >
         <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
           <path
@@ -223,117 +193,103 @@ export default function LoginForm({ initialMode = "guest" }: LoginFormProps) {
 
       <div className="relative flex items-center justify-center">
         <div className="absolute inset-x-0 h-px bg-slate-800" />
-        <span className="relative bg-slate-900 px-3 text-[10px] font-mono uppercase tracking-[0.3em] text-slate-500">
+        <span className="relative bg-[#0b1220] px-3 text-[10px] uppercase tracking-[0.2em] text-slate-500">
           Or continue with email
         </span>
       </div>
 
       {error ? (
-        <div className="flex items-start gap-3 rounded-lg border border-rose-500/20 bg-rose-500/5 p-3 text-xs text-rose-400">
+        <div className="flex items-start gap-3 rounded-lg border border-rose-500/20 bg-rose-500/5 p-3 text-xs text-rose-300">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <p className="leading-relaxed">{error}</p>
         </div>
       ) : null}
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        {mode === "account" ? (
-          <>
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="login-email"
-                className="text-xs font-semibold text-slate-400"
-              >
-                Email Address
-              </label>
-              <div className="relative flex items-center">
-                <Mail className="absolute left-3.5 h-4.5 w-4.5 text-slate-500" />
-                <input
-                  id="login-email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  type="email"
-                  autoComplete="email"
-                  placeholder="name@example.com"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="login-password"
-                  className="text-xs font-semibold text-slate-400"
-                >
-                  Password
-                </label>
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() =>
-                    setError(
-                      "Password reset instructions have been simulated & sent to " +
-                        email,
-                    )
-                  }
-                  className="text-xs font-medium text-emerald-400 transition hover:text-emerald-300 disabled:opacity-50"
-                >
-                  Forgot password?
-                </button>
-              </div>
-              <div className="relative flex items-center">
-                <Lock className="absolute left-3.5 h-4.5 w-4.5 text-slate-500" />
-                <input
-                  id="login-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="Enter your security credential"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 pl-11 pr-11 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((value) => !value)}
-                  className="absolute right-3.5 text-slate-500 transition hover:text-slate-300"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4.5 w-4.5" />
-                  ) : (
-                    <Eye className="h-4.5 w-4.5" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-4 text-sm leading-6 text-slate-400">
-            <p className="font-medium text-slate-200">Guest mode</p>
-            <p className="mt-2">
-              You can enter the experience directly without providing
-              credentials. You can switch to account mode anytime.
-            </p>
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="login-email"
+            className="text-xs font-semibold text-slate-400"
+          >
+            Email Address
+          </label>
+          <div className="relative flex items-center">
+            <Mail className="absolute left-3.5 h-4.5 w-4.5 text-slate-500" />
+            <input
+              id="login-email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              type="email"
+              autoComplete="email"
+              placeholder="name@example.com"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15"
+            />
           </div>
-        )}
+        </div>
 
-        {mode === "account" ? (
+        <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-400 hover:text-slate-300">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(event) => setRememberMe(event.target.checked)}
-                className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-0 accent-emerald-500"
-              />
-              <span>Remember this sandbox device</span>
+            <label
+              htmlFor="login-password"
+              className="text-xs font-semibold text-slate-400"
+            >
+              Password
             </label>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() =>
+                setError(
+                  "Password reset instructions have been simulated & sent to " +
+                    email,
+                )
+              }
+              className="text-xs font-medium text-cyan-300 transition hover:text-cyan-200 disabled:opacity-50"
+            >
+              Forgot password?
+            </button>
           </div>
-        ) : null}
+          <div className="relative flex items-center">
+            <Lock className="absolute left-3.5 h-4.5 w-4.5 text-slate-500" />
+            <input
+              id="login-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              placeholder="Enter your security credential"
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 py-3 pl-11 pr-11 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-3.5 text-slate-500 transition hover:text-slate-300"
+            >
+              {showPassword ? (
+                <EyeOff className="h-4.5 w-4.5" />
+              ) : (
+                <Eye className="h-4.5 w-4.5" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-400 hover:text-slate-300">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+              className="rounded border-slate-800 bg-slate-950 text-cyan-400 focus:ring-0 accent-cyan-400"
+            />
+            <span>Remember this sandbox device</span>
+          </label>
+        </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
         >
           {loading ? (
             <>
@@ -342,29 +298,25 @@ export default function LoginForm({ initialMode = "guest" }: LoginFormProps) {
             </>
           ) : (
             <>
-              <span>
-                {mode === "guest" ? "Enter as Guest" : "Access Secure Sandbox"}
-              </span>
+              <span>Sign in</span>
               <ArrowRight className="h-4 w-4" />
             </>
           )}
         </button>
 
-        {mode === "account" ? (
-          <p className="text-center text-xs text-slate-500">
-            Don&apos;t have an account?{" "}
-            <a
-              href="/register"
-              className="font-medium text-emerald-400 hover:text-emerald-300"
-            >
-              Create one
-            </a>
-          </p>
-        ) : null}
+        <p className="text-center text-xs text-slate-500">
+          Don&apos;t have an account?{" "}
+          <a
+            href="/register"
+            className="font-medium text-cyan-300 hover:text-cyan-200"
+          >
+            Create one
+          </a>
+        </p>
       </form>
 
-      <div className="flex items-center justify-center gap-2 border-t border-slate-800/50 pt-4 text-[10px] font-mono text-slate-500">
-        <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+      <div className="flex items-center justify-center gap-2 border-t border-slate-800 pt-4 text-[10px] text-slate-500">
+        <ShieldCheck className="h-3.5 w-3.5 text-cyan-300" />
         <span>AES-256 Cloud Sandbox Security Protocol</span>
       </div>
     </div>

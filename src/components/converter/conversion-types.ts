@@ -79,7 +79,7 @@ export const CONVERSION_TYPES: ConversionTypeConfig[] = [
   },
   {
     id: "pdf-image",
-    title: "PDF ⇄ 图片（PNG、JPG）",
+    title: "PDF ⇄ Images (PNG, JPG)",
     description: "Turn PDFs into images or collect images into PDFs.",
     accept: ".pdf,.png,.jpg,.jpeg",
     uploadTitle: "Drag and drop your PDF or image file here",
@@ -135,7 +135,7 @@ export const CONVERSION_TYPES: ConversionTypeConfig[] = [
   },
   {
     id: "images-pdf",
-    title: "图片合并为 PDF",
+    title: "Images to PDF",
     description: "Merge one or more images into a single PDF document.",
     accept: ".png,.jpg,.jpeg,.webp",
     uploadTitle: "Drag and drop your image files here",
@@ -158,7 +158,7 @@ export const CONVERSION_TYPES: ConversionTypeConfig[] = [
   },
   {
     id: "pdf-split",
-    title: "PDF 拆分",
+    title: "Split PDF",
     description: "Split a PDF into separate pages or ranges.",
     accept: ".pdf",
     uploadTitle: "Drag and drop your PDF file here",
@@ -178,7 +178,7 @@ export const CONVERSION_TYPES: ConversionTypeConfig[] = [
   },
   {
     id: "pdf-merge",
-    title: "PDF 合并",
+    title: "Merge PDF",
     description: "Combine multiple PDF files into one document.",
     accept: ".pdf",
     uploadTitle: "Drag and drop your PDF files here",
@@ -201,7 +201,7 @@ export const CONVERSION_TYPES: ConversionTypeConfig[] = [
   },
   {
     id: "image-compress",
-    title: "图片压缩",
+    title: "Compress Image",
     description: "Reduce image size while preserving quality.",
     accept: ".png,.jpg,.jpeg,.webp",
     uploadTitle: "Drag and drop your image here",
@@ -222,7 +222,7 @@ export const CONVERSION_TYPES: ConversionTypeConfig[] = [
   },
   {
     id: "image-format",
-    title: "图片格式转换（PNG/JPG/WebP）",
+    title: "Convert Image Format (PNG/JPG/WebP)",
     description: "Convert images between PNG, JPG, and WebP.",
     accept: ".png,.jpg,.jpeg,.webp",
     uploadTitle: "Drag and drop your image file here",
@@ -245,7 +245,7 @@ export const CONVERSION_TYPES: ConversionTypeConfig[] = [
   },
   {
     id: "txt-pdf",
-    title: "文本（TXT）⇄ PDF",
+    title: "TXT ⇄ PDF",
     description: "Convert plain text files to PDF or export PDF to text.",
     accept: ".txt,.pdf",
     uploadTitle: "Drag and drop your TXT or PDF file here",
