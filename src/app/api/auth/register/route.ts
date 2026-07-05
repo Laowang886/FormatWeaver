@@ -3,10 +3,18 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { validatePassword } from "@/lib/password-policy";
 
 export async function POST(request: Request) {
   try {
-    const { email, password, name } = await request.json();
+    const body = (await request.json()) as {
+      email?: unknown;
+      password?: unknown;
+      name?: unknown;
+    };
+    const email = typeof body.email === "string" ? body.email.trim() : "";
+    const password = typeof body.password === "string" ? body.password : "";
+    const name = typeof body.name === "string" ? body.name.trim() : "";
 
     if (!email || !password) {
       return NextResponse.json(
@@ -15,11 +23,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 8) {
-      return NextResponse.json(
-        { message: "Password must be at least 8 characters long." },
-        { status: 400 },
-      );
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return NextResponse.json({ message: passwordError }, { status: 400 });
     }
 
     // Check if the email address has already been registered.
@@ -42,7 +48,7 @@ export async function POST(request: Request) {
     // Write to database
     await db.insert(users).values({
       email,
-      name: name ?? email.split("@")[0],
+      name: name || email.split("@")[0],
       password: hashedPassword,
     });
 

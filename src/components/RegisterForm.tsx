@@ -17,6 +17,11 @@ import {
   AlertCircle,
   User,
 } from "lucide-react";
+import {
+  MIN_PASSWORD_LENGTH,
+  getPasswordRequirements,
+  validatePassword,
+} from "@/lib/password-policy";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -27,6 +32,7 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const passwordRequirements = getPasswordRequirements(password);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,8 +46,9 @@ export default function RegisterForm() {
       setError("Please provide a valid email address.");
       return;
     }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
     if (password !== confirmPassword) {
@@ -80,7 +87,7 @@ export default function RegisterForm() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     } catch (submitError) {
       setError(
@@ -97,7 +104,7 @@ export default function RegisterForm() {
     setIsLoading(true);
     setError(null);
     try {
-      await signIn("google", { callbackUrl: "/dashboard" });
+      await signIn("google", { callbackUrl: "/" });
     } catch {
       setError(
         "Google signup is currently unavailable. Please configure Google OAuth credentials.",
@@ -228,6 +235,8 @@ export default function RegisterForm() {
                 id="signup-password"
                 type={showPassword ? "text" : "password"}
                 required
+                minLength={MIN_PASSWORD_LENGTH}
+                pattern={`(?=.*[^A-Za-z0-9]).{${MIN_PASSWORD_LENGTH},}`}
                 disabled={isLoading}
                 placeholder="Choose a strong password"
                 value={password}
@@ -247,6 +256,18 @@ export default function RegisterForm() {
                   <Eye className="h-4.5 w-4.5" />
                 )}
               </button>
+            </div>
+            <div className="grid gap-1 text-xs">
+              {passwordRequirements.map((requirement) => (
+                <div
+                  key={requirement.id}
+                  className={
+                    requirement.isMet ? "text-emerald-400" : "text-slate-500"
+                  }
+                >
+                  {requirement.isMet ? "OK" : "-"} {requirement.label}
+                </div>
+              ))}
             </div>
           </div>
 
