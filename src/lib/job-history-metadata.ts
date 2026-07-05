@@ -1,7 +1,9 @@
+import type { ConversionType } from "@/components/converter/conversion-types";
+
 export type ConversionMetadata = {
-  sourceFormat: "pdf" | "docx";
-  targetFormat: "pdf" | "docx";
-  conversionType: "pdf-to-docx" | "docx-to-pdf";
+  sourceFormat: string;
+  targetFormat: string;
+  conversionType: string;
 };
 
 export type DatabaseHistoryJob = {
@@ -23,10 +25,7 @@ export type DatabaseHistoryRecord = {
   downloadUrl: string;
 };
 
-const conversions: Record<
-  ConversionMetadata["conversionType"],
-  ConversionMetadata
-> = {
+const conversions: Record<string, ConversionMetadata> = {
   "pdf-to-docx": {
     sourceFormat: "pdf",
     targetFormat: "docx",
@@ -37,12 +36,67 @@ const conversions: Record<
     targetFormat: "pdf",
     conversionType: "docx-to-pdf",
   },
+  "excel-csv": {
+    sourceFormat: "xlsx",
+    targetFormat: "csv",
+    conversionType: "excel-csv",
+  },
+  "image-compress": {
+    sourceFormat: "image",
+    targetFormat: "image",
+    conversionType: "image-compress",
+  },
+  "image-format": {
+    sourceFormat: "image",
+    targetFormat: "image",
+    conversionType: "image-format",
+  },
+  "images-pdf": {
+    sourceFormat: "image",
+    targetFormat: "pdf",
+    conversionType: "images-pdf",
+  },
+  "pdf-image": {
+    sourceFormat: "pdf",
+    targetFormat: "image",
+    conversionType: "pdf-image",
+  },
+  "pdf-merge": {
+    sourceFormat: "pdf",
+    targetFormat: "pdf",
+    conversionType: "pdf-merge",
+  },
+  "pdf-split": {
+    sourceFormat: "pdf",
+    targetFormat: "pdf",
+    conversionType: "pdf-split",
+  },
+  "txt-pdf": {
+    sourceFormat: "txt",
+    targetFormat: "pdf",
+    conversionType: "txt-pdf",
+  },
 };
 
-export function getConversionMetadata(value: FormDataEntryValue | null) {
-  return typeof value === "string" && value in conversions
-    ? conversions[value as ConversionMetadata["conversionType"]]
-    : null;
+export function getConversionMetadata(
+  value: FormDataEntryValue | ConversionType | null,
+  fileName?: string,
+) {
+  if (typeof value !== "string") return null;
+
+  if (value === "pdf-word") {
+    return fileName?.toLowerCase().endsWith(".docx")
+      ? conversions["docx-to-pdf"]
+      : conversions["pdf-to-docx"];
+  }
+
+  if (value === "word-pdf") {
+    return fileName?.toLowerCase().endsWith(".pdf")
+      ? conversions["pdf-to-docx"]
+      : conversions["docx-to-pdf"];
+  }
+
+  return conversions[value] ?? null;
 }
 
 export function encodeConversionMetadata(metadata: ConversionMetadata) {
@@ -59,7 +113,7 @@ function decodeConversionMetadata(description: string | null) {
     const conversionType = Reflect.get(value, "conversionType");
     if (typeof conversionType !== "string") return null;
 
-    return getConversionMetadata(conversionType);
+    return conversions[conversionType] ?? null;
   } catch {
     return null;
   }

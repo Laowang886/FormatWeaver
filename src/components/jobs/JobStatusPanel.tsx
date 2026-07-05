@@ -33,15 +33,27 @@ export default function JobStatusPanel({ jobId }: { jobId: string }) {
   }, [jobId]);
 
   if (!job)
-    return <div className="text-sm text-slate-400">Checking job status…</div>;
+    return (
+      <div className="border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-300">
+        Checking job status...
+      </div>
+    );
 
   return (
-    <div className="space-y-3">
-      <div className="text-sm font-medium text-white">Status: {job.status}</div>
+    <div className="space-y-4 border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <div className="text-sm text-slate-400">Job status</div>
+          <div className="mt-1 text-lg font-semibold capitalize text-white">
+            {job.status}
+          </div>
+        </div>
+        <div className="text-sm text-slate-400">{job.progress ?? 0}%</div>
+      </div>
       {job.progress !== undefined && (
-        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
+        <div className="h-2 w-full overflow-hidden bg-slate-800">
           <div
-            className="h-2 bg-sky-500"
+            className="h-2 bg-cyan-300 transition-all"
             style={{ width: `${job.progress}%` }}
           />
         </div>

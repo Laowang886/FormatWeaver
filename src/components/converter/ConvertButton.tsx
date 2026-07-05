@@ -17,9 +17,9 @@ export default function ConvertButton({
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className="inline-flex w-full items-center justify-center rounded-xl bg-sky-500 px-4 py-3 font-medium text-white hover:bg-sky-400 disabled:opacity-60"
+      className="inline-flex w-full items-center justify-center bg-cyan-400 px-5 py-4 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
     >
-      {loading ? "Converting..." : (label ?? "Convert")}
+      {loading ? "Preparing conversion..." : (label ?? "Convert")}
     </button>
   );
 }

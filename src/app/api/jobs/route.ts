@@ -1,33 +1,24 @@
-import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { desc, eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import {
+  DEFAULT_CONVERSION_OPTIONS,
+  type ConversionOptionsState,
+  type ConversionType,
+} from "@/components/converter/conversion-types";
 import { db } from "@/lib/db";
 import {
   encodeConversionMetadata,
   getConversionMetadata,
   historyRecordFromJob,
 } from "@/lib/job-history-metadata";
+import { getJobsQueue } from "@/lib/job-queue";
+import { saveUploadFiles } from "@/lib/job-storage";
+import type { JobPayload } from "@/lib/job-types";
 import { jobs, users } from "@/lib/schema";
 
-type JobStatus = "queued" | "processing" | "completed" | "failed";
-
-type JobRecord = {
-  id: string;
-  status: JobStatus;
-  progress: number;
-  type: string;
-  filename: string;
-  downloadUrl?: string;
-};
-
-declare global {
-  var __FORMATWEAVER_JOBS__: Record<string, JobRecord> | undefined;
-}
-
-// In-memory jobs store for demo purposes
-let JOBS: Record<string, JobRecord> = globalThis.__FORMATWEAVER_JOBS__ ?? {};
-globalThis.__FORMATWEAVER_JOBS__ = JOBS;
+export const runtime = "nodejs";
 
 async function findUserIdByEmail(email: string) {
   const [user] = await db
@@ -37,11 +28,6 @@ async function findUserIdByEmail(email: string) {
     .limit(1);
 
   return user?.id ?? null;
-}
-
-function saveInMemoryJob(job: JobRecord) {
-  JOBS = { ...JOBS, [job.id]: job };
-  globalThis.__FORMATWEAVER_JOBS__ = JOBS;
 }
 
 export async function GET() {
@@ -85,15 +71,20 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const form = await request.formData();
-  const conversion = getConversionMetadata(form.get("type"));
-  const file = form.get("file");
+  const type = form.get("type") as ConversionType | null;
+  const optionsRaw = form.get("options");
+  const files = form.getAll("files");
+  const singleFile = form.get("file");
+
+  const inputFiles = files.filter((item): item is File => item instanceof File);
+  if (inputFiles.length === 0 && singleFile instanceof File) {
+    inputFiles.push(singleFile);
+  }
 
   if (
-    !conversion ||
-    !(file instanceof File) ||
-    file.size === 0 ||
-    file.name.length > 255 ||
-    !file.name.toLowerCase().endsWith(`.${conversion.sourceFormat}`)
+    !type ||
+    inputFiles.length === 0 ||
+    inputFiles.some((file) => file.size === 0)
   ) {
     return NextResponse.json(
       { message: "A valid type and source file are required." },
@@ -101,94 +92,85 @@ export async function POST(request: Request) {
     );
   }
 
+  const parsedOptions = parseOptions(optionsRaw);
   const session = await auth();
-  let databaseJobId: number | null = null;
-
-  if (session?.user) {
-    const email = session.user.email;
-    if (!email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
-    try {
-      const userId = await findUserIdByEmail(email);
-      if (!userId) {
-        return NextResponse.json(
-          { message: "Unable to save conversion history." },
-          { status: 500 },
-        );
-      }
-
-      const [databaseJob] = await db
-        .insert(jobs)
-        .values({
-          userId,
-          title: file.name,
-          description: encodeConversionMetadata(conversion),
-          status: "processing",
-        })
-        .returning({ id: jobs.id });
-
-      databaseJobId = databaseJob.id;
-    } catch (error) {
-      console.error("Job history creation failed", error);
-      return NextResponse.json(
-        { message: "Unable to save conversion history." },
-        { status: 500 },
-      );
-    }
-  }
-
+  const databaseJobId = await createHistoryJob(
+    session?.user?.email,
+    type,
+    inputFiles,
+  );
   const id = databaseJobId === null ? randomUUID() : String(databaseJobId);
-  saveInMemoryJob({
-    id,
-    status: "queued",
-    progress: 0,
-    type: conversion.conversionType,
-    filename: file.name,
-  });
+  const savedFiles = await saveUploadFiles(id, inputFiles);
+  const payload: JobPayload = {
+    type,
+    options: parsedOptions,
+    files: savedFiles,
+    createdAt: new Date().toISOString(),
+    databaseJobId,
+  };
 
-  // simulate async processing
-  setTimeout(() => startProcessing(id, databaseJobId), 500);
+  const queue = getJobsQueue();
+  await queue.add("convert", payload, {
+    jobId: id,
+    removeOnComplete: false,
+    removeOnFail: false,
+  });
 
   return NextResponse.json({ jobId: id });
 }
 
-function startProcessing(id: string, databaseJobId: number | null) {
-  const job = JOBS[id];
-  if (!job) return;
-  saveInMemoryJob({ ...job, status: "processing" });
-  let p = 0;
-  const t = setInterval(() => {
-    p += 15 + Math.floor(Math.random() * 10);
-    const progress = Math.min(100, p);
-    const currentJob = JOBS[id];
-    if (!currentJob) {
-      clearInterval(t);
-      return;
-    }
+async function createHistoryJob(
+  email: string | null | undefined,
+  type: ConversionType,
+  inputFiles: File[],
+) {
+  if (!email) return null;
 
-    if (progress >= 100) {
-      saveInMemoryJob({
-        ...currentJob,
-        status: "completed",
-        progress,
-        downloadUrl: `/api/jobs/${id}/download`,
-      });
-      clearInterval(t);
+  try {
+    const userId = await findUserIdByEmail(email);
+    if (!userId) return null;
 
-      if (databaseJobId !== null) {
-        void db
-          .update(jobs)
-          .set({ status: "completed", updatedAt: new Date() })
-          .where(eq(jobs.id, databaseJobId))
-          .catch((error) => {
-            console.error(`Job ${id} history update failed`, error);
-          });
-      }
-      return;
-    }
+    const [firstFile] = inputFiles;
+    const metadata = getConversionMetadata(type, firstFile.name);
+    if (!metadata) return null;
 
-    saveInMemoryJob({ ...currentJob, progress });
-  }, 700);
+    const [databaseJob] = await db
+      .insert(jobs)
+      .values({
+        userId,
+        title:
+          inputFiles.length === 1
+            ? firstFile.name
+            : `${firstFile.name} and ${inputFiles.length - 1} more`,
+        description: encodeConversionMetadata(metadata),
+        status: "queued",
+      })
+      .returning({ id: jobs.id });
+
+    return databaseJob.id;
+  } catch (error) {
+    console.error("Job history creation failed", error);
+    return null;
+  }
+}
+
+function parseOptions(optionsRaw: FormDataEntryValue | null) {
+  if (typeof optionsRaw !== "string" || !optionsRaw.trim()) {
+    return DEFAULT_CONVERSION_OPTIONS;
+  }
+
+  try {
+    const parsed = JSON.parse(optionsRaw) as Partial<ConversionOptionsState>;
+    return {
+      pageRange: parsed.pageRange ?? DEFAULT_CONVERSION_OPTIONS.pageRange,
+      compressionQuality:
+        parsed.compressionQuality ??
+        DEFAULT_CONVERSION_OPTIONS.compressionQuality,
+      targetFormat:
+        parsed.targetFormat ?? DEFAULT_CONVERSION_OPTIONS.targetFormat,
+      mergeOrder: parsed.mergeOrder ?? DEFAULT_CONVERSION_OPTIONS.mergeOrder,
+    };
+  } catch {
+    return DEFAULT_CONVERSION_OPTIONS;
+  }
 }

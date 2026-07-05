@@ -29,6 +29,37 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Conversion system
+
+FormatWeaver now includes:
+
+- multi-format conversion selection
+- advanced parameter panels for split, compression, image format, and merge ordering
+- Redis + BullMQ job queue
+- file uploads stored on disk under `storage/`
+- a worker process for background conversions
+
+### Local environment
+
+Keep `.env.local` with:
+
+```bash
+REDIS_URL=redis://127.0.0.1:6379
+STORAGE_DIR=storage
+```
+
+### Start Redis
+
+```bash
+docker compose up -d redis
+```
+
+### Start the worker
+
+```bash
+npm run worker
+```
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
