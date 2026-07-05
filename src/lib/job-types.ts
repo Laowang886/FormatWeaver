@@ -20,6 +20,7 @@ export type JobPayload = {
   options: JobOptions;
   files: JobInputFile[];
   createdAt: string;
+  databaseJobId?: number | null;
 };
 
 export type JobOutputArtifact = {

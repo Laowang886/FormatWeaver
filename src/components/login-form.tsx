@@ -89,7 +89,7 @@ export default function LoginForm({ initialMode = "guest" }: LoginFormProps) {
         throw new Error("Failed to enter guest mode. Please try again.");
       }
 
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     } catch (guestError) {
       setError(
@@ -124,7 +124,7 @@ export default function LoginForm({ initialMode = "guest" }: LoginFormProps) {
         throw new Error("Login failed. Please check your email and password.");
       }
 
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     } catch (submitError) {
       setError(
@@ -142,7 +142,7 @@ export default function LoginForm({ initialMode = "guest" }: LoginFormProps) {
     setError(null);
 
     try {
-      await signIn("google", { callbackUrl: "/dashboard" });
+      await signIn("google", { callbackUrl: "/" });
     } catch {
       setError(
         "Google login is currently unavailable. Please configure Google OAuth credentials.",

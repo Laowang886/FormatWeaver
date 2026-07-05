@@ -1,6 +1,9 @@
 import { Worker } from "bullmq";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
 import { getJobsQueueName, getRedisConnectionOptions } from "@/lib/job-queue";
 import { processJobConversion } from "@/lib/job-processing";
+import { jobs } from "@/lib/schema";
 import type { JobPayload } from "@/lib/job-types";
 
 async function main() {
@@ -33,10 +36,12 @@ async function main() {
 
   worker.on("completed", (job) => {
     console.log(`Job ${job.id} completed.`);
+    void updateHistoryStatus(job.data as JobPayload, "completed");
   });
 
   worker.on("failed", (job, err) => {
     console.error(`Job ${job?.id} failed:`, err);
+    if (job) void updateHistoryStatus(job.data as JobPayload, "failed");
   });
 
   const shutdown = async () => {
@@ -46,6 +51,24 @@ async function main() {
 
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
+}
+
+async function updateHistoryStatus(
+  payload: JobPayload,
+  status: "completed" | "failed",
+) {
+  if (payload.databaseJobId === null || payload.databaseJobId === undefined) {
+    return;
+  }
+
+  try {
+    await db
+      .update(jobs)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(jobs.id, payload.databaseJobId));
+  } catch (error) {
+    console.error(`Job ${payload.databaseJobId} history update failed`, error);
+  }
 }
 
 void main();
