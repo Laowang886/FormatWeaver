@@ -34,13 +34,13 @@ export default function JobStatusPanel({ jobId }: { jobId: string }) {
 
   if (!job)
     return (
-      <div className="border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-300">
+      <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-sm text-slate-300">
         Checking job status...
       </div>
     );
 
   return (
-    <div className="space-y-4 border border-white/10 bg-white/[0.03] p-4">
+    <div className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/40 p-4">
       <div className="flex items-center justify-between gap-4">
         <div>
           <div className="text-sm text-slate-400">Job status</div>
@@ -51,9 +51,9 @@ export default function JobStatusPanel({ jobId }: { jobId: string }) {
         <div className="text-sm text-slate-400">{job.progress ?? 0}%</div>
       </div>
       {job.progress !== undefined && (
-        <div className="h-2 w-full overflow-hidden bg-slate-800">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
           <div
-            className="h-2 bg-cyan-300 transition-all"
+            className="h-2 rounded-full bg-cyan-300 transition-all"
             style={{ width: `${job.progress}%` }}
           />
         </div>
@@ -62,7 +62,7 @@ export default function JobStatusPanel({ jobId }: { jobId: string }) {
       {job.status === "completed" && job.downloadUrl && (
         <a
           href={job.downloadUrl}
-          className="inline-block rounded-md bg-emerald-500 px-4 py-2 text-sm text-white"
+          className="inline-block rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
         >
           Download result
         </a>

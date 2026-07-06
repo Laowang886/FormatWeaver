@@ -114,29 +114,27 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl flex flex-col">
-      <div className="h-[3px] w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400" />
-
-      <div className="p-8 pb-4 text-center">
-        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 rotate-3 mb-4">
-          <FileCode2 className="h-5.5 w-5.5 text-slate-950 -rotate-3" />
+    <div className="relative flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#0b1220] shadow-2xl shadow-black/20">
+      <div className="p-6 pb-4 text-center sm:p-8 sm:pb-4">
+        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-400">
+          <FileCode2 className="h-5.5 w-5.5 text-slate-950" />
         </div>
-        <h2 className="text-2xl font-bold font-display text-white">
+        <h2 className="text-2xl font-semibold tracking-tight text-white">
           Create Secure Account
         </h2>
-        <p className="text-xs text-slate-400 mt-1.5">
+        <p className="mt-2 text-sm leading-6 text-slate-400">
           Join FormatWeaver to preserve history and scale document pipelines.
         </p>
       </div>
 
-      <div className="px-8 pb-8 flex flex-col gap-5">
+      <div className="flex flex-col gap-5 px-6 pb-6 sm:px-8 sm:pb-8">
         <div className="w-full">
           <button
             id="btn-signup-social-google"
             type="button"
             disabled={isLoading}
             onClick={handleSocialSignUp}
-            className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3 text-sm font-semibold text-slate-300 hover:border-slate-700 hover:bg-slate-950/80 hover:text-white transition-all disabled:opacity-50 active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-700 bg-slate-950/40 px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-600 hover:bg-slate-900 hover:text-white disabled:opacity-50"
           >
             <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
               <path
@@ -162,7 +160,7 @@ export default function RegisterForm() {
 
         <div className="relative flex items-center justify-center">
           <div className="absolute inset-x-0 h-px bg-slate-800" />
-          <span className="relative px-3 text-[10px] font-mono text-slate-500 bg-slate-900 uppercase tracking-widest">
+          <span className="relative bg-[#0b1220] px-3 text-[10px] uppercase tracking-[0.2em] text-slate-500">
             Or register with email
           </span>
         </div>
@@ -170,7 +168,7 @@ export default function RegisterForm() {
         {error && (
           <div
             id="signup-error-banner"
-            className="flex items-start gap-3 rounded-lg border border-rose-500/20 bg-rose-500/5 p-3 text-xs text-rose-400"
+            className="flex items-start gap-3 rounded-lg border border-rose-500/20 bg-rose-500/5 p-3 text-xs text-rose-300"
           >
             <AlertCircle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
             <p className="leading-relaxed">{error}</p>
@@ -195,7 +193,7 @@ export default function RegisterForm() {
                 placeholder="Jane Doe"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/60 pl-11 pr-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-colors hover:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 disabled:opacity-60"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15 disabled:opacity-60"
               />
             </div>
           </div>
@@ -217,7 +215,7 @@ export default function RegisterForm() {
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/60 pl-11 pr-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-colors hover:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 disabled:opacity-60"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15 disabled:opacity-60"
               />
             </div>
           </div>
@@ -241,7 +239,7 @@ export default function RegisterForm() {
                 placeholder="Choose a strong password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/60 pl-11 pr-11 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-colors hover:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 disabled:opacity-60"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 py-3 pl-11 pr-11 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15 disabled:opacity-60"
               />
               <button
                 id="btn-toggle-signup-password-view"
@@ -262,7 +260,7 @@ export default function RegisterForm() {
                 <div
                   key={requirement.id}
                   className={
-                    requirement.isMet ? "text-emerald-400" : "text-slate-500"
+                    requirement.isMet ? "text-cyan-300" : "text-slate-500"
                   }
                 >
                   {requirement.isMet ? "OK" : "-"} {requirement.label}
@@ -288,7 +286,7 @@ export default function RegisterForm() {
                 placeholder="Verify your security credential"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/60 pl-11 pr-11 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-colors hover:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 disabled:opacity-60"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 py-3 pl-11 pr-11 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15 disabled:opacity-60"
               />
             </div>
           </div>
@@ -297,7 +295,7 @@ export default function RegisterForm() {
             id="btn-signup-submit"
             type="submit"
             disabled={isLoading}
-            className="mt-3 w-full py-3 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.99]"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-400 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:bg-slate-800 disabled:text-slate-500"
           >
             {isLoading ? (
               <>
@@ -319,15 +317,15 @@ export default function RegisterForm() {
             <Link
               id="btn-signup-switch-to-login"
               href="/login"
-              className="text-emerald-400 font-semibold hover:underline hover:text-emerald-300 focus:outline-none"
+              className="font-semibold text-cyan-300 hover:text-cyan-200 focus:outline-none"
             >
               Log In
             </Link>
           </span>
         </div>
 
-        <div className="flex items-center gap-2 justify-center text-[10px] text-slate-500 font-mono border-t border-slate-800/50 pt-4">
-          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+        <div className="flex items-center justify-center gap-2 border-t border-slate-800 pt-4 text-[10px] text-slate-500">
+          <ShieldCheck className="h-3.5 w-3.5 text-cyan-300" />
           <span>AES-256 Cloud Sandbox Security Protocol</span>
         </div>
       </div>

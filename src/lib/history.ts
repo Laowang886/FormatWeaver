@@ -29,7 +29,7 @@ function isHistoryRecord(value: unknown): value is HistoryRecord {
   );
 }
 
-type HistoryFetch = (input: string) => Promise<Response>;
+type HistoryFetch = (input: string, init?: RequestInit) => Promise<Response>;
 
 export async function fetchHistoryRecords(
   fetcher: HistoryFetch = fetch,
@@ -46,4 +46,29 @@ export async function fetchHistoryRecords(
   } catch {
     return [];
   }
+}
+
+export async function deleteHistoryRecord(
+  jobId: string,
+  fetcher: HistoryFetch = fetch,
+) {
+  const response = await fetcher(`/api/jobs/${jobId}`, { method: "DELETE" });
+
+  if (response.ok) return;
+
+  let message = "Unable to delete conversion record.";
+
+  try {
+    const payload: unknown = await response.json();
+    if (payload && typeof payload === "object") {
+      const responseMessage = Reflect.get(payload, "message");
+      if (typeof responseMessage === "string" && responseMessage) {
+        message = responseMessage;
+      }
+    }
+  } catch {
+    // Keep the user-facing fallback when the response is not JSON.
+  }
+
+  throw new Error(message);
 }

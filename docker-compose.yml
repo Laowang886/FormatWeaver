@@ -1,9 +1,5 @@
-#Responsible for enabling one-click local startup of independent, isolated container services (Redis and PostgreSQL).
-
-version: '3.8'
-
 services:
-  #only run the redis service if the environment variable REDIS_ENABLED is set to true
+  #redis
   redis:
     image: redis:latest
     container_name: formatWeaver_redis
@@ -13,6 +9,20 @@ services:
     volumes:
       - redis_data:/data
 
+  #postgres
+  postgres:
+    image: postgres:16-alpine
+    container_name: formatWeaver_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: formatweaver
+      POSTGRES_PASSWORD: formatweaver
+      POSTGRES_DB: formatweaver
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   worker:
     image: node:20-alpine
     container_name: formatWeaver_worker
@@ -20,12 +30,14 @@ services:
     command: sh -c "npm install && npm run worker"
     environment:
       REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://formatweaver:formatweaver@postgres:5432/formatweaver
       STORAGE_DIR: /app/storage
     volumes:
       - ./:/app
     depends_on:
       - redis
+      - postgres
 
-#make sure to create the volume for redis data persistence
 volumes:
   redis_data:
+  postgres_data:

@@ -1,4 +1,5 @@
 import type { ConversionType } from "@/components/converter/conversion-types";
+import { databaseJobQueueId } from "@/lib/job-types";
 
 export type ConversionMetadata = {
   sourceFormat: string;
@@ -130,7 +131,7 @@ export function historyRecordFromJob(
   const metadata = decodeConversionMetadata(job.description);
   if (!metadata) return null;
 
-  const id = String(job.id);
+  const id = databaseJobQueueId(job.id);
 
   return {
     id,

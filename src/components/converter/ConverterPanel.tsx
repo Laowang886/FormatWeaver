@@ -33,6 +33,31 @@ export default function ConverterPanel() {
     setOptions(DEFAULT_CONVERSION_OPTIONS);
   };
 
+  const setSelectedFiles = (nextFiles: File[]) => {
+    setJobId(null);
+    setError(null);
+
+    if (!config.allowMultipleFiles) {
+      setFiles(nextFiles.slice(0, 1));
+      return;
+    }
+
+    setFiles((currentFiles) => {
+      const filesByKey = new Map(
+        currentFiles.map((file) => [
+          `${file.name}-${file.size}-${file.lastModified}`,
+          file,
+        ]),
+      );
+
+      nextFiles.forEach((file) => {
+        filesByKey.set(`${file.name}-${file.size}-${file.lastModified}`, file);
+      });
+
+      return Array.from(filesByKey.values());
+    });
+  };
+
   const submit = async () => {
     if (files.length === 0) return setError("Choose a file first");
     setError(null);
@@ -56,48 +81,23 @@ export default function ConverterPanel() {
   };
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[360px_1fr]">
-      <aside className="space-y-4">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-cyan-300">
-            Conversion
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">
-            Choose a tool
-          </h2>
-        </div>
-        <ConversionTypeSelector value={type} onChange={setConversionType} />
-      </aside>
-
-      <section className="border border-white/10 bg-[#080b12]">
-        <div className="border-b border-white/10 p-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-sm text-slate-400">Current tool</p>
-              <h3 className="mt-1 text-2xl font-semibold text-white">
-                {config.title}
-              </h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                {config.description}
-              </p>
-            </div>
-            <div className="border border-white/10 px-3 py-2 text-xs text-slate-300">
-              {config.allowMultipleFiles ? "Multiple files" : "Single file"}
-            </div>
-          </div>
+    <div className="mx-auto max-w-4xl px-4 sm:px-6">
+      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b1220] shadow-2xl shadow-black/15">
+        <div className="border-b border-slate-800 p-5 sm:p-6">
+          <ConversionTypeSelector value={type} onChange={setConversionType} />
         </div>
 
-        <div className="space-y-6 p-5">
+        <div className="space-y-6 p-5 sm:p-6">
           <FileDropzone
             accept={config.accept}
             title={config.uploadTitle}
             subtitle={config.uploadSubtitle}
             multiple={config.allowMultipleFiles}
-            onFiles={setFiles}
+            onFiles={setSelectedFiles}
           />
 
           {files.length > 0 && (
-            <div className="border border-white/10 bg-white/[0.03] p-4">
+            <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
               <div className="mb-3 flex items-center justify-between gap-4">
                 <div className="font-medium text-white">Selected files</div>
                 <button
@@ -108,7 +108,7 @@ export default function ConverterPanel() {
                   Clear
                 </button>
               </div>
-              <ul className="divide-y divide-white/10 text-sm">
+              <ul className="divide-y divide-slate-800 text-sm">
                 {files.map((file, index) => (
                   <li
                     key={`${file.name}-${index}`}
@@ -132,7 +132,7 @@ export default function ConverterPanel() {
           />
 
           {error && (
-            <div className="border border-rose-400/30 bg-rose-500/10 p-3 text-sm text-rose-100">
+            <div className="rounded-xl border border-rose-400/25 bg-rose-500/10 p-3 text-sm text-rose-100">
               {error}
             </div>
           )}

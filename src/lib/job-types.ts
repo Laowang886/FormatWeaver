@@ -55,3 +55,15 @@ export type JobStatusResponse = {
 
 export type PdfMergeOrder = MergeOrder;
 export type ImageFormat = TargetImageFormat;
+
+export function databaseJobQueueId(databaseJobId: number) {
+  return `job-${databaseJobId}`;
+}
+
+export function parseDatabaseJobId(value: string) {
+  const match = /^job-([1-9]\d*)$/.exec(value) ?? /^([1-9]\d*)$/.exec(value);
+  if (!match) return null;
+
+  const id = Number(match[1]);
+  return Number.isSafeInteger(id) ? id : null;
+}

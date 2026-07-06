@@ -1,6 +1,10 @@
+import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { db } from "@/lib/db";
 import { getJobsQueue } from "@/lib/job-queue";
-import type { JobStatusResponse } from "@/lib/job-types";
+import { parseDatabaseJobId, type JobStatusResponse } from "@/lib/job-types";
+import { jobs, users } from "@/lib/schema";
 
 export const runtime = "nodejs";
 
@@ -46,6 +50,56 @@ export async function GET(
   }
 
   return NextResponse.json({ message: "job not found" }, { status: 404 });
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  const session = await auth();
+  const email = session?.user?.email;
+
+  if (!email) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await context.params;
+  const jobId = parseDatabaseJobId(id);
+  if (jobId === null) {
+    return NextResponse.json({ message: "Invalid job ID." }, { status: 400 });
+  }
+
+  try {
+    const [user] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (!user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const [deletedJob] = await db
+      .delete(jobs)
+      .where(and(eq(jobs.id, jobId), eq(jobs.userId, user.id)))
+      .returning({ id: jobs.id });
+
+    if (!deletedJob) {
+      return NextResponse.json(
+        { message: "Conversion record not found." },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("History deletion failed", error);
+    return NextResponse.json(
+      { message: "Unable to delete conversion record." },
+      { status: 500 },
+    );
+  }
 }
 
 function mapState(state: string): JobStatusResponse["status"] {

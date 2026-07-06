@@ -1,12 +1,15 @@
 import { Worker } from "bullmq";
+import dotenv from "dotenv";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { getJobsQueueName, getRedisConnectionOptions } from "@/lib/job-queue";
-import { processJobConversion } from "@/lib/job-processing";
-import { jobs } from "@/lib/schema";
 import type { JobPayload } from "@/lib/job-types";
 
+dotenv.config({ path: ".env.local" });
+
 async function main() {
+  const { getJobsQueueName, getRedisConnectionOptions } =
+    await import("@/lib/job-queue");
+  const { processJobConversion } = await import("@/lib/job-processing");
+
   const worker = new Worker(
     getJobsQueueName(),
     async (job) => {
@@ -62,6 +65,11 @@ async function updateHistoryStatus(
   }
 
   try {
+    const [{ db }, { jobs }] = await Promise.all([
+      import("@/lib/db"),
+      import("@/lib/schema"),
+    ]);
+
     await db
       .update(jobs)
       .set({ status, updatedAt: new Date() })
