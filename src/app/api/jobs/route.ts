@@ -15,7 +15,7 @@ import {
 } from "@/lib/job-history-metadata";
 import { getJobsQueue } from "@/lib/job-queue";
 import { saveUploadFiles } from "@/lib/job-storage";
-import type { JobPayload } from "@/lib/job-types";
+import { databaseJobQueueId, type JobPayload } from "@/lib/job-types";
 import { jobs, users } from "@/lib/schema";
 
 export const runtime = "nodejs";
@@ -99,7 +99,8 @@ export async function POST(request: Request) {
     type,
     inputFiles,
   );
-  const id = databaseJobId === null ? randomUUID() : String(databaseJobId);
+  const id =
+    databaseJobId === null ? randomUUID() : databaseJobQueueId(databaseJobId);
   const savedFiles = await saveUploadFiles(id, inputFiles);
   const payload: JobPayload = {
     type,

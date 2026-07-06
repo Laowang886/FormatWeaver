@@ -33,6 +33,7 @@ export default function FileDropzone({
   const onSelect = useCallback(() => {
     const files = Array.from(inputRef.current?.files ?? []);
     if (files.length > 0) onFiles(multiple ? files : files.slice(0, 1));
+    if (inputRef.current) inputRef.current.value = "";
     setDragging(false);
   }, [multiple, onFiles]);
 

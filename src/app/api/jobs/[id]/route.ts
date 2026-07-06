@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { getJobsQueue } from "@/lib/job-queue";
-import type { JobStatusResponse } from "@/lib/job-types";
+import { parseDatabaseJobId, type JobStatusResponse } from "@/lib/job-types";
 import { jobs, users } from "@/lib/schema";
 
 export const runtime = "nodejs";
@@ -64,12 +64,8 @@ export async function DELETE(
   }
 
   const { id } = await context.params;
-  if (!/^[1-9]\d*$/.test(id)) {
-    return NextResponse.json({ message: "Invalid job ID." }, { status: 400 });
-  }
-
-  const jobId = Number(id);
-  if (!Number.isSafeInteger(jobId)) {
+  const jobId = parseDatabaseJobId(id);
+  if (jobId === null) {
     return NextResponse.json({ message: "Invalid job ID." }, { status: 400 });
   }
 

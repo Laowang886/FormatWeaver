@@ -33,6 +33,31 @@ export default function ConverterPanel() {
     setOptions(DEFAULT_CONVERSION_OPTIONS);
   };
 
+  const setSelectedFiles = (nextFiles: File[]) => {
+    setJobId(null);
+    setError(null);
+
+    if (!config.allowMultipleFiles) {
+      setFiles(nextFiles.slice(0, 1));
+      return;
+    }
+
+    setFiles((currentFiles) => {
+      const filesByKey = new Map(
+        currentFiles.map((file) => [
+          `${file.name}-${file.size}-${file.lastModified}`,
+          file,
+        ]),
+      );
+
+      nextFiles.forEach((file) => {
+        filesByKey.set(`${file.name}-${file.size}-${file.lastModified}`, file);
+      });
+
+      return Array.from(filesByKey.values());
+    });
+  };
+
   const submit = async () => {
     if (files.length === 0) return setError("Choose a file first");
     setError(null);
@@ -68,7 +93,7 @@ export default function ConverterPanel() {
             title={config.uploadTitle}
             subtitle={config.uploadSubtitle}
             multiple={config.allowMultipleFiles}
-            onFiles={setFiles}
+            onFiles={setSelectedFiles}
           />
 
           {files.length > 0 && (
