@@ -16,6 +16,12 @@ export default async function HistoryPage() {
         {hasHistoryAccess ? (
           <>
             <div className="mb-8 sm:mb-10">
+              <Link
+                href="/"
+                className="mb-4 inline-flex text-sm text-slate-400 transition-colors hover:text-slate-200"
+              >
+                ← Back to home
+              </Link>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
                 Your workspace
               </p>
