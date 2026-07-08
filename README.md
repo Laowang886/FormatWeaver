@@ -8,12 +8,12 @@ Fast, simple document conversion — convert images, merge PDFs, extract PDF pag
 
 ## Features
 
-- 🖼️ **Image Format Conversion** — JPG, PNG, WebP, GIF, AVIF
-- 📎 **PDF Merge** — combine multiple PDF files into one
-- 🖨️ **PDF to Image** — extract PDF pages as PNG/JPG at configurable DPI
-- 📄 **Document Conversion** — Word ↔ PDF, Excel → PDF, PPT ↔ PDF
-- 🔐 **Secure Login** — sign in with Google, or email & password
-- 👤 **Guest Mode** — try the tool without creating an account
+- **Image Format Conversion** 
+- **PDF Merge** 
+- **PDF to Image**
+- **Document Conversion** 
+- **Secure Login** 
+- **Guest Mode**
 
 ## Tech Stack
 
@@ -75,16 +75,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 This project is deployed on [Vercel](https://vercel.com/). Environment variables must be configured in the Vercel project settings, and the production domain must be added to the Google OAuth **Authorized redirect URIs**:
 
-```
-https://your-domain.vercel.app/api/auth/callback/google
-```
 
-## Roadmap
-
-- [ ] File size limits per plan tier
-- [ ] Task queue for long-running document conversions
-- [ ] More image formats (HEIC, TIFF)
-- [ ] Automated testing (unit + integration)
 
 ## License
 
