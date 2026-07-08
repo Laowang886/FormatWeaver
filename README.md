@@ -1,67 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FormatWeaver
+
+Fast, simple document conversion — convert images, merge PDFs, extract PDF pages as images, and convert between document formats, right in your browser.
+
+🔗 **Live Demo**: [format-weaver-five.vercel.app](https://format-weaver-five.vercel.app)
+
+---
+
+## Features
+
+- 🖼️ **Image Format Conversion** — JPG, PNG, WebP, GIF, AVIF
+- 📎 **PDF Merge** — combine multiple PDF files into one
+- 🖨️ **PDF to Image** — extract PDF pages as PNG/JPG at configurable DPI
+- 📄 **Document Conversion** — Word ↔ PDF, Excel → PDF, PPT ↔ PDF
+- 🔐 **Secure Login** — sign in with Google, or email & password
+- 👤 **Guest Mode** — try the tool without creating an account
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Auth**: [NextAuth.js (Auth.js v5)](https://authjs.dev/)
+- **Database**: [Neon](https://neon.tech/) (Serverless Postgres)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **File Processing**: [sharp](https://sharp.pixelplumbing.com/) (images), [pdf-lib](https://pdf-lib.js.org/) (PDF merge), [pdf.js](https://mozilla.github.io/pdf.js/) (PDF rendering)
+- **Deployment**: [Vercel](https://vercel.com/)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- A [Neon](https://neon.tech/) Postgres database
+- A [Google Cloud](https://console.cloud.google.com/) OAuth client (for Google login)
+
+### Installation
+
+```bash
+git clone https://github.com/Laowang886/FormatWeaver.git
+cd FormatWeaver
+npm install
+```
+
+### Environment Variables
+
+Create a `.env.local` file in the project root:
+
+```env
+DATABASE_URL=your_neon_connection_string
+AUTH_SECRET=your_generated_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
+
+Generate `AUTH_SECRET` with:
+
+```bash
+npx auth secret
+```
+
+### Database Setup
+
+```bash
+npx drizzle-kit push
+```
+
+### Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project is deployed on [Vercel](https://vercel.com/). Environment variables must be configured in the Vercel project settings, and the production domain must be added to the Google OAuth **Authorized redirect URIs**:
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Conversion system
-
-FormatWeaver now includes:
-
-- multi-format conversion selection
-- advanced parameter panels for split, compression, image format, and merge ordering
-- Redis + BullMQ job queue
-- file uploads stored on disk under `storage/`
-- a worker process for background conversions
-
-### Local environment
-
-Keep `.env.local` with:
-
-```bash
-REDIS_URL=redis://127.0.0.1:6379
-STORAGE_DIR=storage
+```
+https://your-domain.vercel.app/api/auth/callback/google
 ```
 
-### Start Redis
+## Roadmap
 
-```bash
-docker compose up -d redis
-```
+- [ ] File size limits per plan tier
+- [ ] Task queue for long-running document conversions
+- [ ] More image formats (HEIC, TIFF)
+- [ ] Automated testing (unit + integration)
 
-### Start the worker
+## License
 
-```bash
-npm run worker
-```
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is for personal/educational use.
