@@ -27,6 +27,7 @@ export function getRedisConnectionOptions(): ConnectionOptions {
     username: parsed.username || undefined,
     password: parsed.password || undefined,
     db,
+    tls: parsed.protocol === "rediss:" ? {} : undefined,
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
   };
