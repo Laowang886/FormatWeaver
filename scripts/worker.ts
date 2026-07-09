@@ -29,7 +29,6 @@ async function main() {
         outputFileName: result.primaryArtifact.fileName,
         outputMimeType: result.primaryArtifact.mimeType,
         outputFilePath: result.primaryArtifact.filePath,
-        outputStorageKey: result.primaryArtifact.storageKey,
       };
     },
     {

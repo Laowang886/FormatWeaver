@@ -13,11 +13,7 @@ import type {
   ConversionOptionsState,
 } from "@/components/converter/conversion-types";
 import type { JobInputFile, JobOutput } from "@/lib/job-types";
-import {
-  materializeJobInputFiles,
-  readJobFile,
-  writeJobOutputFile,
-} from "@/lib/job-storage";
+import { readJobFile, writeJobOutputFile } from "@/lib/job-storage";
 
 function sortInputs(
   files: JobInputFile[],
@@ -298,8 +294,7 @@ export async function processJobConversion(params: {
   options: ConversionOptionsState;
   files: JobInputFile[];
 }): Promise<JobOutput> {
-  const { jobId, type, options } = params;
-  const files = await materializeJobInputFiles(jobId, params.files);
+  const { jobId, type, options, files } = params;
 
   if (type === "pdf-merge") {
     const output = await mergePdfs(files, options.mergeOrder, jobId);

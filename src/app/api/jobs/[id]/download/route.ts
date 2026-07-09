@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs/promises";
 import { getJobsQueue } from "@/lib/job-queue";
-import { fileExists, readJobFile } from "@/lib/job-storage";
+import { fileExists } from "@/lib/job-storage";
 
 export const runtime = "nodejs";
 
@@ -21,30 +22,21 @@ export async function GET(
         outputFileName?: string;
         outputMimeType?: string;
         outputFilePath?: string;
-        outputStorageKey?: string;
       }
     | undefined;
 
   const filePath = result?.outputFilePath;
-  const storageKey = result?.outputStorageKey;
   const fileName = result?.outputFileName ?? `formatweaver-result-${id}.txt`;
   const mimeType = result?.outputMimeType ?? "application/octet-stream";
 
-  if (!filePath && !storageKey) {
+  if (!filePath || !(await fileExists(filePath))) {
     return NextResponse.json(
       { message: "generated file not found" },
       { status: 404 },
     );
   }
 
-  if (filePath && !storageKey && !(await fileExists(filePath))) {
-    return NextResponse.json(
-      { message: "generated file not found" },
-      { status: 404 },
-    );
-  }
-
-  const content = await readJobFile(filePath ?? "", storageKey);
+  const content = await fs.readFile(filePath);
   return new Response(content, {
     status: 200,
     headers: {
