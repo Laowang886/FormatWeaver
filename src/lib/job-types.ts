@@ -9,6 +9,7 @@ export type JobInputFile = {
   originalName: string;
   storedName: string;
   storedPath: string;
+  storageKey?: string;
   mimeType: string;
   size: number;
 };
@@ -26,6 +27,7 @@ export type JobPayload = {
 export type JobOutputArtifact = {
   fileName: string;
   filePath: string;
+  storageKey?: string;
   mimeType: string;
   size: number;
 };
