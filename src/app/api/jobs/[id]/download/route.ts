@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import { getJobsQueue } from "@/lib/job-queue";
-import { fileExists } from "@/lib/job-storage";
+import { fileExists, readDirectJobRecord } from "@/lib/job-storage";
 
 export const runtime = "nodejs";
 
@@ -11,6 +11,15 @@ export async function GET(
 ) {
   const p = await context.params;
   const id = p.id;
+
+  const directJob = await readDirectJobRecord(id);
+  if (directJob) {
+    return sendFile({
+      filePath: directJob.outputFilePath,
+      fileName: directJob.outputFileName ?? `formatweaver-result-${id}.txt`,
+      mimeType: directJob.outputMimeType ?? "application/octet-stream",
+    });
+  }
 
   const job = await getJobsQueue().getJob(id);
   if (!job) {
@@ -29,6 +38,18 @@ export async function GET(
   const fileName = result?.outputFileName ?? `formatweaver-result-${id}.txt`;
   const mimeType = result?.outputMimeType ?? "application/octet-stream";
 
+  return sendFile({ filePath, fileName, mimeType });
+}
+
+async function sendFile({
+  filePath,
+  fileName,
+  mimeType,
+}: {
+  filePath: string | undefined;
+  fileName: string;
+  mimeType: string;
+}) {
   if (!filePath || !(await fileExists(filePath))) {
     return NextResponse.json(
       { message: "generated file not found" },
