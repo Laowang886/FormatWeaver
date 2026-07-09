@@ -53,6 +53,10 @@ export type JobStatusResponse = {
   outputMimeType?: string;
 };
 
+export type DirectJobRecord = JobStatusResponse & {
+  outputFilePath?: string;
+};
+
 export type PdfMergeOrder = MergeOrder;
 export type ImageFormat = TargetImageFormat;
 

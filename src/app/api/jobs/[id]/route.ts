@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { getJobsQueue } from "@/lib/job-queue";
+import { readDirectJobRecord } from "@/lib/job-storage";
 import { parseDatabaseJobId, type JobStatusResponse } from "@/lib/job-types";
 import { jobs, users } from "@/lib/schema";
 
@@ -15,8 +16,28 @@ export async function GET(
   const p = await context.params;
   const id = p.id;
 
-  const queue = getJobsQueue();
-  const job = await queue.getJob(id);
+  const directJob = await readDirectJobRecord(id);
+  if (directJob) {
+    const response: JobStatusResponse = {
+      id: directJob.id,
+      type: directJob.type,
+      status: directJob.status,
+      progress: directJob.progress,
+      error: directJob.error,
+      createdAt: directJob.createdAt,
+      completedAt: directJob.completedAt,
+      files: directJob.files,
+      options: directJob.options,
+      downloadUrl: directJob.downloadUrl,
+      outputFileName: directJob.outputFileName,
+      outputMimeType: directJob.outputMimeType,
+    };
+    return NextResponse.json(response);
+  }
+
+  const job = process.env.REDIS_URL
+    ? await getJobsQueue().getJob(id)
+    : undefined;
 
   if (job) {
     const state = await job.getState();
