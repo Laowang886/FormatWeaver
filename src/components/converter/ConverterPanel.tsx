@@ -13,8 +13,6 @@ import {
 } from "@/components/converter/conversion-types";
 import ConversionOptions from "@/components/converter/ConversionOptions";
 
-const MAX_DIRECT_UPLOAD_BYTES = 3 * 1024 * 1024;
-
 export default function ConverterPanel() {
   const [type, setType] = useState<ConversionType>("pdf-word");
   const [files, setFiles] = useState<File[]>([]);
@@ -62,11 +60,6 @@ export default function ConverterPanel() {
 
   const submit = async () => {
     if (files.length === 0) return setError("Choose a file first");
-    const totalUploadSize = files.reduce((sum, file) => sum + file.size, 0);
-    if (totalUploadSize > MAX_DIRECT_UPLOAD_BYTES) {
-      return setError("Direct demo mode supports uploads up to 3 MB.");
-    }
-
     setError(null);
     setLoading(true);
 
@@ -77,14 +70,7 @@ export default function ConverterPanel() {
       files.forEach((file) => fd.append("files", file, file.name));
 
       const res = await fetch("/api/jobs", { method: "POST", body: fd });
-      if (!res.ok) {
-        const payload = await res.json().catch(() => null);
-        const message =
-          payload && typeof payload.message === "string"
-            ? payload.message
-            : "Failed to create job";
-        throw new Error(message);
-      }
+      if (!res.ok) throw new Error("Failed to create job");
       const { jobId } = await res.json();
       setJobId(jobId);
     } catch (e) {

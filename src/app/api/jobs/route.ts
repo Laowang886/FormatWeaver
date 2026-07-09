@@ -13,14 +13,12 @@ import {
   getConversionMetadata,
   historyRecordFromJob,
 } from "@/lib/job-history-metadata";
-import { processJobConversion } from "@/lib/job-processing";
-import { saveUploadFiles, writeDirectJobRecord } from "@/lib/job-storage";
-import { databaseJobQueueId } from "@/lib/job-types";
+import { getJobsQueue } from "@/lib/job-queue";
+import { saveUploadFiles } from "@/lib/job-storage";
+import { databaseJobQueueId, type JobPayload } from "@/lib/job-types";
 import { jobs, users } from "@/lib/schema";
 
 export const runtime = "nodejs";
-
-const MAX_DIRECT_UPLOAD_BYTES = 3 * 1024 * 1024;
 
 async function findUserIdByEmail(email: string) {
   const [user] = await db
@@ -94,14 +92,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const totalUploadSize = inputFiles.reduce((sum, file) => sum + file.size, 0);
-  if (totalUploadSize > MAX_DIRECT_UPLOAD_BYTES) {
-    return NextResponse.json(
-      { message: "Direct conversion supports uploads up to 3 MB." },
-      { status: 413 },
-    );
-  }
-
   const parsedOptions = parseOptions(optionsRaw);
   const session = await auth();
   const databaseJobId = await createHistoryJob(
@@ -112,45 +102,20 @@ export async function POST(request: Request) {
   const id =
     databaseJobId === null ? randomUUID() : databaseJobQueueId(databaseJobId);
   const savedFiles = await saveUploadFiles(id, inputFiles);
-  const createdAt = new Date().toISOString();
-
-  let result;
-  try {
-    result = await processJobConversion({
-      jobId: id,
-      type,
-      options: parsedOptions,
-      files: savedFiles,
-    });
-  } catch (error) {
-    console.error("Direct conversion failed", error);
-    if (databaseJobId !== null) {
-      await updateHistoryJobStatus(databaseJobId, "failed");
-    }
-    return NextResponse.json(
-      { message: "Conversion failed. Try a smaller or simpler file." },
-      { status: 500 },
-    );
-  }
-
-  await writeDirectJobRecord({
-    id,
+  const payload: JobPayload = {
     type,
-    status: "completed",
-    progress: 100,
-    createdAt,
-    completedAt: new Date().toISOString(),
-    files: savedFiles,
     options: parsedOptions,
-    downloadUrl: `/api/jobs/${id}/download`,
-    outputFileName: result.primaryArtifact.fileName,
-    outputMimeType: result.primaryArtifact.mimeType,
-    outputFilePath: result.primaryArtifact.filePath,
-  });
+    files: savedFiles,
+    createdAt: new Date().toISOString(),
+    databaseJobId,
+  };
 
-  if (databaseJobId !== null) {
-    await updateHistoryJobStatus(databaseJobId, "completed");
-  }
+  const queue = getJobsQueue();
+  await queue.add("convert", payload, {
+    jobId: id,
+    removeOnComplete: false,
+    removeOnFail: false,
+  });
 
   return NextResponse.json({ jobId: id });
 }
@@ -187,20 +152,6 @@ async function createHistoryJob(
   } catch (error) {
     console.error("Job history creation failed", error);
     return null;
-  }
-}
-
-async function updateHistoryJobStatus(
-  databaseJobId: number,
-  status: "completed" | "failed",
-) {
-  try {
-    await db
-      .update(jobs)
-      .set({ status, updatedAt: new Date() })
-      .where(eq(jobs.id, databaseJobId));
-  } catch (error) {
-    console.error(`Job ${databaseJobId} history update failed`, error);
   }
 }
 

@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import path from "path";
-import type { DirectJobRecord } from "@/lib/job-types";
 
 const storageRoot = path.resolve(process.env.STORAGE_DIR ?? "storage");
 
@@ -18,10 +17,6 @@ export function getJobInputDirectory(jobId: string) {
 
 export function getJobOutputDirectory(jobId: string) {
   return path.join(getJobDirectory(jobId), "outputs");
-}
-
-function getJobMetadataPath(jobId: string) {
-  return path.join(getJobDirectory(jobId), "job.json");
 }
 
 export async function ensureJobDirectories(jobId: string) {
@@ -126,19 +121,5 @@ export async function listJobOutputs(jobId: string) {
     return await fs.readdir(dir);
   } catch {
     return [] as string[];
-  }
-}
-
-export async function writeDirectJobRecord(record: DirectJobRecord) {
-  await ensureJobDirectories(record.id);
-  await fs.writeFile(getJobMetadataPath(record.id), JSON.stringify(record));
-}
-
-export async function readDirectJobRecord(jobId: string) {
-  try {
-    const raw = await fs.readFile(getJobMetadataPath(jobId), "utf8");
-    return JSON.parse(raw) as DirectJobRecord;
-  } catch {
-    return null;
   }
 }
